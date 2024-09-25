@@ -1,4 +1,5 @@
-# docker-microcks
+# Microcks Application (Under Docker)
+
 Microcks mocking eco-system running under docker.
 
 Composed of : 
@@ -7,8 +8,21 @@ Composed of :
 - MongoDB
 - Postman runtime
 
-Requirements : 
+## Requirements
+
 - You must have Traefik v3 container runnning. 
 
 You must add in the /etc/hosts the following configurations
 - 127.0.0.1 microcks.local.io microcks-kc.local.io microcks-postman.local.io
+
+## Start the container
+
+```bash
+make start
+```
+
+## Stop the container
+
+```bash
+make stop
+```
