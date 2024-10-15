@@ -76,3 +76,8 @@ services:
       #- MAX_UPLOAD_FILE_SIZE=3MB
     volumes:
       - "./config:/deployments/config"
+    # develop:
+    #   watch:
+    #     - action: sync+restart
+    #       path: ./config
+    #       target: /deployments/config
