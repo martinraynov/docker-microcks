@@ -51,7 +51,7 @@ services:
       - mongo
       - keycloak
       - postman
-    image: quay.io/microcks/microcks:1.9.0
+    image: quay.io/microcks/microcks:1.10.1
     container_name: microcks
     networks:
       - default
@@ -74,3 +74,5 @@ services:
       - KEYCLOAK_PUBLIC_URL=http://microcks-kc.local.io
       - JAVA_OPTIONS=-Dspring.security.oauth2.resourceserver.jwt.issuer-uri=http://microcks-kc.local.io/realms/microcks -Dspring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://keycloak:8080/realms/microcks/protocol/openid-connect/certs
       #- MAX_UPLOAD_FILE_SIZE=3MB
+    volumes:
+      - "./config:/deployments/config"
