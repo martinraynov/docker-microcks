@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Requirements : you must have make installed on your system
-# Usage: ./scripts/run.sh <command> or APP_NAME <command> (if installed as executable)
+# Usage: Only as installed executable ! Use APP_NAME <command> (when installed as executable)
 
+APP_PATH=$(dirname $(find -L /usr/local/bin/microcks -exec readlink -f {} +))
 if [ -n "$1" ]; then
-    make $1
+    (cd ${APP_PATH} && cd .. && ${pwd} && make $1)
 else
-    make
+    (cd ${APP_PATH} && cd .. && make)
 fi
 
