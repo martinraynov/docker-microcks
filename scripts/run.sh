@@ -8,3 +8,4 @@ if [ -n "$1" ]; then
 else
     make
 fi
+
