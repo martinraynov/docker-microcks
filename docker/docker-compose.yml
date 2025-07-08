@@ -21,8 +21,10 @@ services:
     image: quay.io/keycloak/keycloak:22.0.2
     container_name: microcks-sso
     networks:
-      - default
-      - microcks
+      default : 
+      microcks : 
+        aliases:
+          - microcks-kc.local.io
     labels:
       - "traefik.enable=true"
 

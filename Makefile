@@ -42,4 +42,12 @@ stop: ## Stopping running Microcks instances
 	$(info $(M) Stopping $(APP_NAME) instance)
 	@docker-compose -f ./docker/docker-compose.yml down
 
+.PHONY: cli
+cli: ## Access the Microcks CLI
+	$(info $(M) Accessing the $(APP_NAME) CLI)
+	@docker run --rm -it \
+	--network host \
+	--hostname microcks-cli \
+	quay.io/microcks/microcks-cli:latest /bin/bash
+
 .DEFAULT_GOAL := help
