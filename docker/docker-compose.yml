@@ -7,9 +7,40 @@ networks:
     name: microcks
 
 services:
+  mariadb:
+    image: mariadb:12.0
+    container_name: microcks-mariadb
+    networks:
+      - default
+      - microcks
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.tcp.routers.mariadb.entrypoints=db"
+      - "traefik.tcp.routers.mariadb.rule=HostSNI(`*`)"
+      # - "traefik.tcp.routers.mariadb.rule=HostSNI(`microcks-mariadb.local.io`)"
+      - "traefik.tcp.routers.mariadb.service=svc_mariadb"
+      - "traefik.tcp.services.svc_mariadb.loadbalancer.server.port=3306"
+      # - "traefik.tcp.routers.mariadb.tls.certresolver=letsencrypt"
+      # - "traefik.tcp.routers.mariadb.tls.passthrough=true"
+    command: --bind-address=0.0.0.0  # Allow external connections
+    environment:
+      MARIADB_USER: admin
+      MARIADB_PASSWORD: admin
+      MARIADB_DATABASE: keycloak
+      MARIADB_ROOT_PASSWORD: admin
+    volumes:
+      - "./data/mariadb:/var/lib/mysql"
+      # - "./config/microcks-mariadb.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf:ro"
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
   mongo:
     image: mongo:3.6.23
-    container_name: microcks-db
+    container_name: microcks-mongodb
     networks:
       - microcks
     labels:
@@ -18,6 +49,9 @@ services:
       - "./data/microcks:/data/db"
 
   keycloak:
+    depends_on:
+      mariadb:
+        condition: service_healthy
     image: quay.io/keycloak/keycloak:22.0.2
     container_name: microcks-sso
     networks:
@@ -33,14 +67,18 @@ services:
       - "traefik.http.routers.keycloack.service=svc_keycloack"
       - "traefik.http.services.svc_keycloack.loadbalancer.server.port=8080"
     environment:
+      KC_DB: mariadb
+      KC_DB_URL: jdbc:mariadb://mariadb:3306/keycloak?characterEncoding=UTF-8
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin
       KEYCLOAK_ADMIN: "admin"
       KEYCLOAK_ADMIN_PASSWORD: "admin"
       KC_HOSTNAME_ADMIN_URL: "http://microcks-kc.local.io"
       KC_HOSTNAME_URL: "http://microcks-kc.local.io"
+      KC_LOG_LEVEL: info
     volumes:
       - "./keycloak-realm/microcks-realm-sample.json:/opt/keycloak/data/import/microcks-realm.json"
-    command:
-      - start-dev --import-realm
+    command: start-dev --import-realm
 
   postman:
     image: quay.io/microcks/microcks-postman-runtime:latest

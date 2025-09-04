@@ -22,7 +22,7 @@ remove: ## Remove Application as executable
 .PHONY: add_localhost
 add_localhost: ## Add local host into /etc/hosts file (need root permission)
 	@ echo "# >>> ${APP_NAME} for workspace" >> /etc/hosts
-	@ echo "127.0.0.1\tmicrocks.local.io microcks-kc.local.io microcks-postman.local.io" >> /etc/hosts
+	@ echo "127.0.0.1\tmicrocks.local.io microcks-kc.local.io microcks-postman.local.io microcks-mariadb.local.io microcks-mongodb.local.io" >> /etc/hosts
 	@ echo "# <<< ${APP_NAME} for workspace" >> /etc/hosts
 	$(info $(M) Local host added for ${APP_NAME} application in your hosts file)
 
