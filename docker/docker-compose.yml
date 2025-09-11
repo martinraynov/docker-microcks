@@ -15,14 +15,10 @@ services:
       - microcks
     labels:
       - "traefik.enable=true"
-
       - "traefik.tcp.routers.mariadb.entrypoints=db"
       - "traefik.tcp.routers.mariadb.rule=HostSNI(`*`)"
-      # - "traefik.tcp.routers.mariadb.rule=HostSNI(`microcks-mariadb.local.io`)"
       - "traefik.tcp.routers.mariadb.service=svc_mariadb"
       - "traefik.tcp.services.svc_mariadb.loadbalancer.server.port=3306"
-      # - "traefik.tcp.routers.mariadb.tls.certresolver=letsencrypt"
-      # - "traefik.tcp.routers.mariadb.tls.passthrough=true"
     command: --bind-address=0.0.0.0  # Allow external connections
     environment:
       MARIADB_USER: admin
@@ -44,9 +40,15 @@ services:
     networks:
       - microcks
     labels:
-      - "traefik.enable=false"
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.mariadb.entrypoints=db"
+      - "traefik.tcp.routers.mongodb.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.mongodb.service=svc_mongodb"
+      - "traefik.tcp.services.mongodb.loadbalancer.server.port=27017"
     volumes:
-      - "./data/microcks:/data/db"
+      - "./data/mongodb/mongodb:/data/mongodb"
+      - "./data/mongodb/configdb:/data/configdb"
+      - "./data/mongodb/db:/data/db"
 
   keycloak:
     depends_on:
@@ -61,7 +63,6 @@ services:
           - microcks-kc.local.io
     labels:
       - "traefik.enable=true"
-
       - "traefik.http.routers.keycloack.entrypoints=web"
       - "traefik.http.routers.keycloack.rule=Host(`microcks-kc.local.io`)"
       - "traefik.http.routers.keycloack.service=svc_keycloack"
@@ -98,7 +99,6 @@ services:
       - microcks
     labels:
       - "traefik.enable=true"
-
       - "traefik.http.routers.microcks.entrypoints=web"
       - "traefik.http.routers.microcks.rule=Host(`microcks.local.io`)"
       - "traefik.http.routers.microcks.service=svc_microcks"

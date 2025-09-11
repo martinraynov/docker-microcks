@@ -1,5 +1,3 @@
-/docker/data/microcks/*
-!/docker/data/microcks/.gitKeep
+/docker/data/mongodb/*/*
 /docker/data/mariadb/*
 !/docker/data/mariadb/.gitKeep
-
