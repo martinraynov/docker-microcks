@@ -41,7 +41,7 @@ services:
       - microcks
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.mariadb.entrypoints=db"
+      - "traefik.tcp.routers.mongodb.entrypoints=db"
       - "traefik.tcp.routers.mongodb.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.mongodb.service=svc_mongodb"
       - "traefik.tcp.services.mongodb.loadbalancer.server.port=27017"
@@ -49,12 +49,17 @@ services:
       - "./data/mongodb/mongodb:/data/mongodb"
       - "./data/mongodb/configdb:/data/configdb"
       - "./data/mongodb/db:/data/db"
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 1s
+      retries: 3
 
   keycloak:
     depends_on:
       mariadb:
         condition: service_healthy
-    image: quay.io/keycloak/keycloak:22.0.2
+    image: quay.io/keycloak/keycloak:26.0
     container_name: microcks-sso
     networks:
       default : 
@@ -72,20 +77,36 @@ services:
       KC_DB_URL: jdbc:mariadb://mariadb:3306/keycloak?characterEncoding=UTF-8
       KC_DB_USERNAME: admin
       KC_DB_PASSWORD: admin
-      KEYCLOAK_ADMIN: "admin"
-      KEYCLOAK_ADMIN_PASSWORD: "admin"
+      KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "admin"
       KC_HOSTNAME_ADMIN_URL: "http://microcks-kc.local.io"
       KC_HOSTNAME_URL: "http://microcks-kc.local.io"
       KC_LOG_LEVEL: info
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KC_LOG_CONSOLE_LEVEL: debug
     volumes:
       - "./keycloak-realm/microcks-realm-sample.json:/opt/keycloak/data/import/microcks-realm.json"
+      - "./keycloak-theme/mraynov:/opt/keycloak/themes/mraynov"
     command: start-dev --import-realm
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo -e 'GET /health/live HTTP/1.1\r\nHost: localhost\r\n\r\n' > /dev/tcp/localhost/9000"]
+      start_period: 10s
+      interval: 10s
+      timeout: 2s
+      retries: 3
 
   postman:
     image: quay.io/microcks/microcks-postman-runtime:latest
     container_name: microcks-postman-runtime
     networks:
       - microcks
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      start_period: 5s
+      interval: 20s
+      timeout: 3s
+      retries: 3
 
   app:
     depends_on:
@@ -116,6 +137,12 @@ services:
       #- MAX_UPLOAD_FILE_SIZE=3MB
     volumes:
       - "./config:/deployments/config"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      start_period: 35s
+      interval: 10s
+      timeout: 3s
+      retries: 3
     # develop:
     #   watch:
     #     - action: sync+restart
