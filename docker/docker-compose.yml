@@ -72,6 +72,15 @@ services:
       - "traefik.http.routers.keycloack.rule=Host(`microcks-kc.local.io`)"
       - "traefik.http.routers.keycloack.service=svc_keycloack"
       - "traefik.http.services.svc_keycloack.loadbalancer.server.port=8080"
+
+      - "sablier.enable=true"
+      - "sablier.group=traefik"
+      - "traefik.http.routers.keycloack.middlewares=sablier@file"
+      - "traefik.http.middlewares.keycloak-sablier.plugin.sablier.sablierUrl=http://sablier:10000"
+      - "traefik.http.middlewares.keycloak-sablier.plugin.sablier.group=keycloak"
+      - "traefik.http.middlewares.keycloak-sablier.plugin.sablier.sessionDuration=5m"
+      # Allow Traefik to route to non-running containers
+      - "traefik.docker.allownonrunning=true"
     environment:
       KC_DB: mariadb
       KC_DB_URL: jdbc:mariadb://mariadb:3306/keycloak?characterEncoding=UTF-8
@@ -124,6 +133,15 @@ services:
       - "traefik.http.routers.microcks.rule=Host(`microcks.local.io`)"
       - "traefik.http.routers.microcks.service=svc_microcks"
       - "traefik.http.services.svc_microcks.loadbalancer.server.port=8080"
+
+      - "sablier.enable=true"
+      - "sablier.group=traefik"
+      - "traefik.http.routers.microcks.middlewares=sablier@file"
+      - "traefik.http.middlewares.microcks-sablier.plugin.sablier.sablierUrl=http://sablier:10000"
+      - "traefik.http.middlewares.microcks-sablier.plugin.sablier.group=microcks"
+      - "traefik.http.middlewares.microcks-sablier.plugin.sablier.sessionDuration=5m"
+      # Allow Traefik to route to non-running containers
+      - "traefik.docker.allownonrunning=true"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017
