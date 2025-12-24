@@ -76,9 +76,6 @@ services:
       - "sablier.enable=true"
       - "sablier.group=traefik"
       - "traefik.http.routers.keycloack.middlewares=sablier@file"
-      - "traefik.http.middlewares.keycloak-sablier.plugin.sablier.sablierUrl=http://sablier:10000"
-      - "traefik.http.middlewares.keycloak-sablier.plugin.sablier.group=keycloak"
-      - "traefik.http.middlewares.keycloak-sablier.plugin.sablier.sessionDuration=5m"
       # Allow Traefik to route to non-running containers
       - "traefik.docker.allownonrunning=true"
     environment:
@@ -137,9 +134,6 @@ services:
       - "sablier.enable=true"
       - "sablier.group=traefik"
       - "traefik.http.routers.microcks.middlewares=sablier@file"
-      - "traefik.http.middlewares.microcks-sablier.plugin.sablier.sablierUrl=http://sablier:10000"
-      - "traefik.http.middlewares.microcks-sablier.plugin.sablier.group=microcks"
-      - "traefik.http.middlewares.microcks-sablier.plugin.sablier.sessionDuration=5m"
       # Allow Traefik to route to non-running containers
       - "traefik.docker.allownonrunning=true"
     environment:
